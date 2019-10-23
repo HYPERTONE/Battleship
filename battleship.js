@@ -70,15 +70,84 @@
 var controller = {
 	guesses: 0,
 	
+
 	processGuess: function(guess) {
-		//
+		var location = parseGuess(guess);
+		if (location) {
+			this.guesses++;
+			var hit = model.fire(location);
+			if (hit && model.shipsSunk == model.numShips) {
+				view.displayMessage("You sank all my battleships, in " + this.guesses + " guesses");
+			}
+		}
+
 	}
 };
+
+
+
+ function parseGuess(guess) {
+	var alphabet = ["A", "B", "C", "D", "E", "F", "G"];
+
+	if (guess === null || guess.length !== 2) {
+		alert("Please enter a valid format (Letter and Number");
+	} else {
+		firstChar = guess.charAt(0); // Grabs the first character
+		var row = alphabet.indexOf(firstChar); // Determine value of char using alphabet list's index 
+		var column = guess.charAt(1); // Grab the second character
+		
+		if (isNaN(row) || isNaN(column)) {
+			alert("Invalid entry. Not found on board.");
+		} else if (row < 0 || row >= model.boardSize || column < 0 || column >= model.boardSize) {
+			alert("Invalid entry. Out of bounds on the board.");
+		} else {
+			return row + column;
+		}
+	}
+	return null;
+}
  
+
+
+
+function handleFireButton() {
+	// get the player's guess from the form and send it to the controller
+	var guessInput = document.getElementById("guessInput");
+	var guess = guessInput.value;
+	controller.processGuess(guess); // pass the guess to the controller to validate it
+
+	guessInput.value = ""; // this resets the value in the input so the user doesn't have to delete it
+}
+
+
+
+
+
+function init() {
+	var fireButton = document.getElementById("fireButton"); // get button's ID
+	fireButton.onclick = handleFireButton; // Add a click handler function to the button
+}
+
+
+
+window.onload = init;
+
+
+/*console.log(controller.processGuess("A0"));
  
- 
- 
-/* view.displayMiss("00");
+console.log(controller.processGuess("B0"));
+console.log(controller.processGuess("C0"));
+console.log(controller.processGuess("D0"));
+
+console.log(controller.processGuess("D2"));
+console.log(controller.processGuess("D3"));
+console.log(controller.processGuess("D4"));
+
+console.log(controller.processGuess("G3"));
+console.log(controller.processGuess("G4"));
+console.log(controller.processGuess("G5"));*/
+
+/*view.displayMiss("00");
 view.displayHit("34");
 view.displayMessage("yo dawg"); */
 
