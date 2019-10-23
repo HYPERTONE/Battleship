@@ -27,9 +27,9 @@
 	 shipLength: 3,
 	 shipsSunk: 0,
 	 
-	 ships:  [{ locations: ["10", "20", "30"], hits: ["", "", ""] },
-			  { locations: ["32", "33", "34"], hits: ["", "", ""] },
-		      { locations: ["63", "64", "65"], hits: ["", "", ""] }],
+	 ships:  [{ locations: [0, 0, 0], hits: ["", "", ""] },
+			  { locations: [0, 0, 0], hits: ["", "", ""] },
+		      { locations: [0, 0, 0], hits: ["", "", ""] }],
 			  
 	fire: function(guess) {
 		
@@ -62,9 +62,62 @@
 			}
 		}
 		return true;
+	},
+	
+	
+	generateShipLocations: function() {
+		var locations;
+		for (var i = 0; i < this.numShips; i++) { // generate locations for the number of ships specified above
+			do {
+				locations = this.generateShip();
+			} while (this.collision(locations)); // if there is a collision, keep generating locations
+			this.ships[i].locations = locations;
+		}
+	},
+	
+	generateShip: function() {
+		var direction = Math.floor(Math.random() * 2);
+		var row, col;
+		
+		if (direction === 1) { // 1 being horizontal
+			row = Math.floor(Math.random() * this.boardSize); // which is from 0 to 7 (A to G)
+			col = Math.floor(Math.random() * (this.boardSize - this.shipLength)); // this can only be from 0-4 since the shipLength is 3 (so it fits on the board)
+		} else {
+			row = Math.floor(Math.random() * this.boardSize);
+			col = Math.floor(Math.random() * (this.boardSize - this.shipLength));
+		}
+		
+		var newShipLocations = [];
+		for (var i = 0; i < this.shipLength; i++) {
+			if (direction === 1) {
+				newShipLocations.push(row + "" + (col + i)); 
+			} else {
+				newShipLocations.push((row + i) + "" + col);
+			}
+		}
+		return newShipLocations;
+	},
+	
+	
+	collision: function(locations) {
+		for (var i = 0; i < this.numShips; i++) {
+			var ship = model.ships[i];
+			for (var j = 0; j < locations.length; j++) {
+				if (ship.locations.indexOf(locations[j]) >= 0) { // check generated locations; if the index is -1 then there is no match
+					return true;								 // but if the index is >= 0 then it means there is a match (collision)
+				}
+			}
+		}
+		return false;
 	}
 	 
  };
+ 
+ 
+ 
+ 
+ 
+ 
  
  
 var controller = {
@@ -120,12 +173,24 @@ function handleFireButton() {
 }
 
 
+function handleKeyPress(e) {
+	var fireButton = document.getElementById("fireButton");
+	if (e.keyCode === 13) { // keyCode 13 is the Return/Enter key
+		fireButton.click(); // so when we see a 13 pressed, we will simulate a click 
+		return false;
+	}
+}
 
 
 
 function init() {
 	var fireButton = document.getElementById("fireButton"); // get button's ID
 	fireButton.onclick = handleFireButton; // Add a click handler function to the button
+	
+	var guessInput = document.getElementById("guessInput");
+	guessInput.onkeypress = handleKeyPress; // This handles key press events from HTML input field
+	
+	model.generateShipLocations(); // immediately generate ship locations 
 }
 
 
